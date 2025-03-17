@@ -1,0 +1,30 @@
+/* 設定表格容器 */
+.score-table {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* 設定標題和資料行 */
+.header, .score-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+}
+
+.header div, .score-row div {
+    width: 45%; /* 姓名和分數各占一半 */
+    text-align: left;
+}
+
+/* 可以加些美化的樣式 */
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+strong {
+    font-weight: bold;
+}

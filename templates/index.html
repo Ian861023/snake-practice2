@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Score</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1">
+</head>
+<body>
+    <h1>Snake Score</h1>
+
+<form id="updateForm">
+    <input type="text" id="snakename" placeholder="Enter player name" required />
+	 <button type="submit">Update Score</button>
+    <input type="number" id="score" placeholder="Enter new score" required />
+   
+	<button type="button" id="deleteButton">Delete Score</button>
+</form>
+
+
+
+    <div class="score-table">
+        <div class="header">
+            <div><strong>姓名</strong></div>
+            <div><strong>成績</strong></div>
+        </div>
+        <div id="scoresContainer">
+            <!-- 分數資料會插入到這裡 -->
+        </div>
+    </div>
+
+    <script>
+	
+	document.getElementById("updateForm").addEventListener("submit", function(event) {
+    event.preventDefault();  // 防止表单默认提交
+     const token = localStorage.getItem("jwt_token");  // 取出 Token
+    if (!token) {
+        alert("你還沒登入，請先登入！");
+        return;
+    }
+    const snakename = document.getElementById("snakename").value;
+    const score = document.getElementById("score").value;
+
+    fetch("http://127.0.0.1:5000/api/games", {
+        method: "PUT",
+        headers: { 
+		"Content-Type": "application/json",
+		"Authorization": "Bearer " + token // 攜帶 Token
+		},
+        body: JSON.stringify({ snakename, score })
+    })
+    .then(response => response.json())
+    .then(data => {
+        location.reload();  // 可選刷新頁面以顯示新增的分數
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        document.getElementById("statusMessage").textContent = 'Failed to update the score. Please try again.';
+    });
+});
+
+document.getElementById("deleteButton").addEventListener("click", function() {
+    const token = localStorage.getItem("jwt_token"); 
+    const snakename = document.getElementById("snakename").value;
+    const score = document.getElementById("score").value;
+
+    fetch("http://127.0.0.1:5000/api/games", {
+        method: "DELETE",
+        headers: { 
+		"Content-Type": "application/json",
+		"Authorization": "Bearer " + token // 攜帶 Token
+		},
+        body: JSON.stringify({ snakename, score })
+    })
+    .then(response => response.json())
+    .then(data => {
+        
+		location.reload();
+    })
+    .catch(error => console.error("Error:", error));
+});
+function fetchAndDisplayScores() {
+    fetch('http://127.0.0.1:5000/api/games')  // 這是從後端獲取分數資料
+        .then(response => response.json())  // 解析為 JSON
+        .then(data => {
+            const container = document.querySelector("#scoresContainer");
+
+            data.forEach(score => {
+                // 創建一個新的行顯示每個分數
+                const row = document.createElement("div");
+                row.classList.add("score-row");
+
+                const nameCell = document.createElement("div");
+                const scoreCell = document.createElement("div");
+
+                nameCell.textContent = score.snakename;  // 顯示玩家名稱
+                scoreCell.textContent = score.score;  // 顯示分數
+
+                row.appendChild(nameCell);
+                row.appendChild(scoreCell);
+                container.appendChild(row);
+            });
+        })
+        .catch(error => console.log('Error:', error));  // 錯誤處理
+}
+
+// 當頁面加載完成後呼叫這個函數
+document.addEventListener('DOMContentLoaded', function() {
+    fetchAndDisplayScores();
+});
+
+    </script>
+</body>
+</html>
